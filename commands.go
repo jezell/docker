@@ -97,6 +97,7 @@ func (cli *DockerCli) CmdHelp(args ...string) error {
 		{"load", "Load an image from a tar archive"},
 		{"login", "Register or Login to the docker registry server"},
 		{"logs", "Fetch the logs of a container"},
+		{"lookup", "Lookup an image by repository:tag"},
 		{"port", "Lookup the public-facing port which is NAT-ed to PRIVATE_PORT"},
 		{"ps", "List containers"},
 		{"pull", "Pull an image or a repository from the docker registry server"},
@@ -160,6 +161,34 @@ func MkBuildContext(dockerfile string, files [][2]string) (archive.Archive, erro
 		return nil, err
 	}
 	return buf, nil
+}
+
+func (cli *DockerCli) CmdLookup(args ...string) error {
+	cmd := cli.Subcmd("lookup", "REPOSITORY:TAG", "Lookup an image by an repository:tag");
+	
+	if err := cmd.Parse(args); err != nil {
+		return nil
+	}
+
+	if cmd.NArg() != 1 {
+		cmd.Usage()
+		return nil
+	}
+
+
+	body, _, err := cli.call("GET", "/images/"+cmd.Arg(0)+"/json", nil)
+	if err != nil {
+		return err
+	}
+
+	container := &Container{}
+	err = json.Unmarshal(body, container)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprint(cli.out, container.ID)
+	return nil
 }
 
 func (cli *DockerCli) CmdBuild(args ...string) error {

@@ -801,6 +801,21 @@ Known Issues (kill)
     docker login localhost:8080
 
 
+.. _cli_lookup:
+
+``lookup``
+---------
+
+::
+
+    Usage: docker lookup REPOSITORY:TAG
+
+    Lookup an image ID by repository and tag
+
+    example:
+    docker lookup stackbrew/ubuntu:12.04
+
+
 .. _cli_logs:
 
 ``logs``

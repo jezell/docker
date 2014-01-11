@@ -535,6 +535,27 @@ func postImagesPush(srv *Server, version float64, w http.ResponseWriter, r *http
 	return nil
 }
 
+func getImagesLookup(srv *Server, version float64, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	if vars == nil {
+		return fmt.Errorf("Missing parameter")
+	}
+	name := vars["name"]
+	parsedRepo, parsedTag := utils.ParseRepositoryTag(name)
+	if parsedTag != "" {
+		imgs, err := srv.LookupImage(parsedRepo, parsedTag)
+		if err != nil {
+			return err
+		}
+		if imgs != nil {
+			if len(imgs) != 0 {
+				return writeJSON(w, http.StatusOK, imgs[0])
+			}
+		}
+	}
+	w.WriteHeader(http.StatusNotFound)
+	return nil
+}
+
 func getImagesGet(srv *Server, version float64, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 	if vars == nil {
 		return fmt.Errorf("Missing parameter")
@@ -1101,6 +1122,7 @@ func createRouter(srv *Server, logging bool) (*mux.Router, error) {
 			"/images/json":                    getImagesJSON,
 			"/images/viz":                     getImagesViz,
 			"/images/search":                  getImagesSearch,
+			"/images/{name:.*}/lookup":        getImagesLookup,
 			"/images/{name:.*}/get":           getImagesGet,
 			"/images/{name:.*}/history":       getImagesHistory,
 			"/images/{name:.*}/json":          getImagesByName,

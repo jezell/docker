@@ -1637,6 +1637,27 @@ func (srv *Server) deleteImageParents(img *Image, imgs *[]APIRmi) error {
 	return nil
 }
 
+func (srv *Server) LookupImage(repoName, tag string) ([]APIID, error) {
+
+	var (
+		imgs = []APIID{}
+	)
+	
+	image, err := srv.runtime.repositories.GetImage(repoName, tag)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	if image == nil {
+		return nil, nil	
+	}
+
+	imgs = append(imgs, APIID{ID: image.ID})
+	return imgs, nil
+}
+
+
 func (srv *Server) deleteImage(img *Image, repoName, tag string) ([]APIRmi, error) {
 	var (
 		imgs = []APIRmi{}
